@@ -1,20 +1,21 @@
 {
-  "homepage": "[https://yxu399.github.io/portfolio](https://yxu399.github.io/portfolio)",
+  "homepage": "https://yxu399.github.io",
   "name": "riley-portfolio",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "lint": "eslint .",
-  "preview": "vite preview",
-  "predeploy": "npm run build",
-  "deploy": "gh-pages -d dist"
-},
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
   "dependencies": {
     "autoprefixer": "^10.4.23",
     "lucide-react": "^0.561.0",
+    "marked": "^17.0.1",
     "postcss": "^8.5.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

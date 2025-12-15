@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Github, 
-  Linkedin, 
-  Mail, 
-  ExternalLink, 
-  Code, 
-  Database, 
-  Cloud, 
-  Terminal, 
-  Menu, 
-  X, 
-  ChevronRight,
-  MapPin,
-  Phone,
+import {
+  Github,
+  Linkedin,
+  Mail,
+  ExternalLink,
+  Code,
+  Database,
+  Cloud,
+  Menu,
+  X,
   Download,
-  Briefcase,
-  GraduationCap
+  Layers,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
+import { marked } from 'marked';
+import AIChatWidget from './components/AIChatWidget';
 
 const Portfolio = () => {
   const [activeSection, setActiveSection] = useState('about');
@@ -35,8 +34,8 @@ const Portfolio = () => {
   // Update active section on scroll
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['about', 'experience', 'projects', 'skills', 'contact'];
-      const scrollPosition = window.scrollY + 200; // Offset for trigger
+      const sections = ['about', 'experience', 'projects', 'skills', 'education', 'contact'];
+      const scrollPosition = window.scrollY + 200;
 
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -63,16 +62,109 @@ const Portfolio = () => {
     </li>
   );
 
+  const ProjectCard = ({ icon: Icon, title, description, technologies, analyzePrompt }) => {
+    const [aiOutput, setAiOutput] = useState('');
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+    const analyzeTechStack = async () => {
+      if (aiOutput && !isAnalyzing) {
+        setAiOutput('');
+        return;
+      }
+
+      setIsAnalyzing(true);
+      setAiOutput('analyzing');
+
+      try {
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: analyzePrompt }] }]
+          })
+        });
+
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Could not generate analysis.";
+        setAiOutput(text);
+      } catch (error) {
+        setAiOutput("Failed to analyze. Please check your API configuration.");
+        console.error(error);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    };
+
+    return (
+      <div className="group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
+        <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-100/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
+        <div className="z-10 sm:col-span-2 mt-1">
+          <div className="w-16 h-16 rounded border border-slate-200 bg-white flex items-center justify-center text-blue-600">
+            <Icon size={32} />
+          </div>
+        </div>
+        <div className="z-10 sm:col-span-6">
+          <div className="flex justify-between items-start">
+            <h3 className="font-medium leading-snug text-slate-900">
+              <a href="#" className="inline-flex items-baseline font-bold text-lg hover:text-blue-600 focus-visible:text-blue-600 group/link">
+                {title}
+                <ExternalLink size={14} className="ml-1 inline-block h-4 w-4 shrink-0 translate-y-px transition-transform group-hover/link:-translate-y-1 group-hover/link:translate-x-1 motion-reduce:transition-none" />
+              </a>
+            </h3>
+            <button
+              onClick={analyzeTechStack}
+              className="hidden md:flex items-center gap-1 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full hover:bg-purple-200 transition-colors"
+            >
+              <Sparkles size={12} /> Analyze Stack
+            </button>
+          </div>
+          <p className="mt-2 text-sm leading-normal text-slate-600">
+            {description}
+          </p>
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {technologies.map(tech => (
+              <li key={tech} className="flex items-center rounded-full bg-blue-100/50 px-3 py-1 text-xs font-medium text-blue-700">
+                {tech}
+              </li>
+            ))}
+          </ul>
+          {aiOutput && (
+            <div className="mt-4 p-4 bg-purple-50 rounded-lg text-sm text-slate-700 border border-purple-100">
+              {isAnalyzing ? (
+                <div className="flex items-center gap-2 text-purple-600">
+                  <Loader2 size={16} className="animate-spin" /> Analyzing architecture...
+                </div>
+              ) : (
+                <>
+                  <h4 className="font-bold text-purple-700 mb-2 flex items-center gap-2">
+                    <Sparkles size={12} /> AI Architecture Analysis
+                  </h4>
+                  <div
+                    className="prose prose-sm prose-slate max-w-none"
+                    dangerouslySetInnerHTML={{ __html: marked.parse(aiOutput) }}
+                  />
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-blue-200 selection:text-blue-900 lg:flex">
-      
+
       {/* Mobile Header */}
-      <div className="lg:hidden flex justify-between items-center p-6 bg-slate-900 text-white sticky top-0 z-50">
+      <div className="lg:hidden flex justify-between items-center p-6 bg-slate-900 text-white sticky top-0 z-50 shadow-md">
         <div>
           <h1 className="text-xl font-bold tracking-tight">Riley Xu</h1>
           <p className="text-blue-400 text-sm">Software Engineer</p>
         </div>
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2">
+        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 hover:bg-slate-800 rounded">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -80,20 +172,20 @@ const Portfolio = () => {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-slate-900 pt-24 px-6 space-y-4">
-           {['about', 'experience', 'projects', 'skills', 'contact'].map(item => (
-             <button 
-               key={item}
-               onClick={() => scrollToSection(item)}
-               className="block text-xl font-bold text-slate-300 py-2 capitalize"
-             >
-               {item}
-             </button>
-           ))}
+          {['about', 'experience', 'projects', 'skills', 'education', 'contact'].map(item => (
+            <button
+              key={item}
+              onClick={() => scrollToSection(item)}
+              className="block text-xl font-bold text-slate-300 py-2 capitalize hover:text-white"
+            >
+              {item}
+            </button>
+          ))}
         </div>
       )}
 
       {/* LEFT COLUMN (Fixed Sidebar) */}
-      <header className="hidden lg:flex lg:flex-col lg:justify-between lg:w-1/3 lg:fixed lg:top-0 lg:bottom-0 lg:left-0 bg-slate-900 text-white p-12 xl:p-20 overflow-y-auto">
+      <header className="hidden lg:flex lg:flex-col lg:justify-between lg:w-1/3 lg:fixed lg:top-0 lg:bottom-0 lg:left-0 bg-slate-900 text-white p-12 xl:p-20 overflow-y-auto custom-scrollbar">
         <div>
           <h1 className="text-4xl xl:text-5xl font-bold tracking-tight mb-3">
             Riley Xu
@@ -107,21 +199,28 @@ const Portfolio = () => {
             <span className="text-slate-500 mt-2 block text-sm">New York, NY</span>
           </p>
 
-          <nav className="hidden lg:block">
+          <nav>
             <ul className="space-y-1">
               <NavItem to="about" label="About" />
               <NavItem to="experience" label="Experience" />
               <NavItem to="projects" label="Projects" />
               <NavItem to="skills" label="Skills" />
+              <NavItem to="education" label="Education" />
               <NavItem to="contact" label="Contact" />
             </ul>
           </nav>
         </div>
 
         <div className="flex items-center gap-6 mt-12">
-          <a href="#" className="text-slate-400 hover:text-white transition-colors" title="GitHub"><Github size={24} /></a>
-          <a href="#" className="text-slate-400 hover:text-white transition-colors" title="LinkedIn"><Linkedin size={24} /></a>
-          <a href="mailto:rileyxu399@gmail.com" className="text-slate-400 hover:text-white transition-colors" title="Email"><Mail size={24} /></a>
+          <a href="https://github.com/yxu399" className="text-slate-400 hover:text-white transition-colors" aria-label="GitHub">
+            <Github size={24} />
+          </a>
+          <a href="https://linkedin.com/in/riley-xu" className="text-slate-400 hover:text-white transition-colors" aria-label="LinkedIn">
+            <Linkedin size={24} />
+          </a>
+          <a href="mailto:yxu399@gmail.com" className="text-slate-400 hover:text-white transition-colors" aria-label="Email">
+            <Mail size={24} />
+          </a>
           <a href="#" className="flex items-center gap-2 text-slate-400 hover:text-blue-400 transition-colors text-sm font-medium ml-auto">
             <Download size={18} /> <span>Resume</span>
           </a>
@@ -130,13 +229,13 @@ const Portfolio = () => {
 
       {/* RIGHT COLUMN (Scrollable Content) */}
       <main className="w-full lg:w-2/3 lg:ml-[33.333333%] p-6 md:p-12 xl:p-24 bg-slate-50">
-        
+
         {/* About Section */}
         <section id="about" className="mb-24 scroll-mt-24">
           <div className="sticky top-0 lg:hidden py-4 bg-slate-50/90 backdrop-blur mb-6 z-10 border-b border-slate-200">
-             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">About</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">About</h2>
           </div>
-          <div className="prose prose-slate prose-lg text-slate-600">
+          <div className="prose prose-slate prose-lg text-slate-600 max-w-none">
             <p className="text-xl font-medium text-slate-900 mb-6">
               My journey evolved from <span className="text-blue-600">pipette to Python</span>.
             </p>
@@ -155,10 +254,10 @@ const Portfolio = () => {
         {/* Experience Section */}
         <section id="experience" className="mb-24 scroll-mt-24">
           <div className="sticky top-0 lg:hidden py-4 bg-slate-50/90 backdrop-blur mb-6 z-10 border-b border-slate-200">
-             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Experience</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Experience</h2>
           </div>
           <div className="space-y-12">
-            
+
             {/* Job 1 */}
             <div className="group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
               <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-100/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
@@ -193,7 +292,7 @@ const Portfolio = () => {
               </header>
               <div className="z-10 sm:col-span-6">
                 <h3 className="font-medium leading-snug text-slate-900">
-                   <div className="group-hover:text-blue-600 transition-colors inline-flex items-baseline font-bold text-lg">
+                  <div className="group-hover:text-blue-600 transition-colors inline-flex items-baseline font-bold text-lg">
                     Data Analyst Researcher
                     <span className="ml-2 text-sm font-normal text-slate-500">@ Weill Cornell</span>
                   </div>
@@ -217,114 +316,82 @@ const Portfolio = () => {
         {/* Projects Section */}
         <section id="projects" className="mb-24 scroll-mt-24">
           <div className="sticky top-0 lg:hidden py-4 bg-slate-50/90 backdrop-blur mb-6 z-10 border-b border-slate-200">
-             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Featured Projects</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Featured Projects</h2>
           </div>
           <div className="space-y-12">
-            
-            {/* Project 1 */}
-            <div className="group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
-              <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-100/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
-              <div className="z-10 sm:col-span-2 mt-1">
-                 <div className="w-20 h-20 rounded border border-slate-200 bg-white flex items-center justify-center text-blue-600">
-                   <Database size={32} />
-                 </div>
-              </div>
-              <div className="z-10 sm:col-span-6">
-                <h3 className="font-medium leading-snug text-slate-900">
-                  <a href="#" className="inline-flex items-baseline font-bold text-lg hover:text-blue-600 focus-visible:text-blue-600 group/link">
-                    DataQuest
-                    <ExternalLink size={14} className="ml-1 inline-block h-4 w-4 shrink-0 translate-y-px transition-transform group-hover/link:-translate-y-1 group-hover/link:translate-x-1 motion-reduce:transition-none" />
-                  </a>
-                </h3>
-                <p className="mt-2 text-sm leading-normal text-slate-600">
-                  AI Conversational Data Analysis Assistant. Built with Anthropic API to enable NLP data analysis on 250K+ rows. Features automatic profiling and interactive Plotly charts.
-                </p>
-                <ul className="mt-4 flex flex-wrap gap-2">
-                  {['Python', 'FastAPI', 'React', 'LangGraph', 'PostgreSQL'].map(tech => (
-                    <li key={tech} className="flex items-center rounded-full bg-blue-100/50 px-3 py-1 text-xs font-medium text-blue-700">
-                      {tech}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
 
-            {/* Project 2 */}
-            <div className="group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
-              <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-100/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
-              <div className="z-10 sm:col-span-2 mt-1">
-                 <div className="w-20 h-20 rounded border border-slate-200 bg-white flex items-center justify-center text-blue-600">
-                   <Code size={32} />
-                 </div>
-              </div>
-              <div className="z-10 sm:col-span-6">
-                <h3 className="font-medium leading-snug text-slate-900">
-                  <a href="#" className="inline-flex items-baseline font-bold text-lg hover:text-blue-600 focus-visible:text-blue-600 group/link">
-                    SyncCode
-                    <ExternalLink size={14} className="ml-1 inline-block h-4 w-4 shrink-0 translate-y-px transition-transform group-hover/link:-translate-y-1 group-hover/link:translate-x-1 motion-reduce:transition-none" />
-                  </a>
-                </h3>
-                <p className="mt-2 text-sm leading-normal text-slate-600">
-                  Real-time collaborative code editor. Architected microservices with conflict resolution algorithms, Redis Pub/Sub, and Docker containerization.
-                </p>
-                <ul className="mt-4 flex flex-wrap gap-2">
-                  {['React', 'Express', 'Redis', 'Docker', 'MongoDB'].map(tech => (
-                    <li key={tech} className="flex items-center rounded-full bg-blue-100/50 px-3 py-1 text-xs font-medium text-blue-700">
-                      {tech}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+            <ProjectCard
+              icon={Database}
+              title="DataQuest"
+              description="AI Conversational Data Analysis Assistant. Built with Anthropic API to enable NLP data analysis on 250K+ rows. Features automatic profiling and interactive Plotly charts."
+              technologies={['Python', 'FastAPI', 'React', 'LangGraph', 'PostgreSQL']}
+              analyzePrompt="Explain briefly (in 2-3 bullet points) how these technologies work together in a project called DataQuest: Python, FastAPI, React, LangGraph, PostgreSQL. Focus on the architecture."
+            />
+
+            <ProjectCard
+              icon={Code}
+              title="SyncCode"
+              description="Real-time collaborative code editor. Architected microservices with conflict resolution algorithms, Redis Pub/Sub, and Docker containerization."
+              technologies={['React', 'Express', 'Redis', 'Docker', 'MongoDB']}
+              analyzePrompt="Explain briefly (in 2-3 bullet points) how these technologies work together in a project called SyncCode: React, Express, Redis, Docker, MongoDB. Focus on the architecture."
+            />
 
           </div>
         </section>
 
         {/* Skills Section */}
         <section id="skills" className="mb-24 scroll-mt-24">
-           <div className="sticky top-0 lg:hidden py-4 bg-slate-50/90 backdrop-blur mb-6 z-10 border-b border-slate-200">
-             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Skills</h2>
+          <div className="sticky top-0 lg:hidden py-4 bg-slate-50/90 backdrop-blur mb-6 z-10 border-b border-slate-200">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Skills</h2>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
-               <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2"><Code size={18} className="text-blue-600"/> Languages</h3>
-               <div className="flex flex-wrap gap-2">
-                 {['Python', 'TypeScript', 'SQL', 'Java', 'C'].map(s => (
-                   <span key={s} className="px-2 py-1 bg-slate-50 rounded text-sm text-slate-700 border border-slate-100">{s}</span>
-                 ))}
-               </div>
+              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <Code size={18} className="text-blue-600"/> Languages
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {['Python', 'TypeScript', 'SQL', 'Java', 'C'].map(s => (
+                  <span key={s} className="px-2 py-1 bg-slate-50 rounded text-sm text-slate-700 border border-slate-100">{s}</span>
+                ))}
+              </div>
             </div>
             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
-               <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2"><Briefcase size={18} className="text-blue-600"/> Stack</h3>
-               <div className="flex flex-wrap gap-2">
-                 {['React', 'Node.js', 'FastAPI', 'Pandas', 'Tailwind'].map(s => (
-                   <span key={s} className="px-2 py-1 bg-slate-50 rounded text-sm text-slate-700 border border-slate-100">{s}</span>
-                 ))}
-               </div>
+              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <Layers size={18} className="text-blue-600"/> Stack
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {['React', 'Node.js', 'FastAPI', 'Pandas', 'Tailwind'].map(s => (
+                  <span key={s} className="px-2 py-1 bg-slate-50 rounded text-sm text-slate-700 border border-slate-100">{s}</span>
+                ))}
+              </div>
             </div>
-             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
-               <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2"><Database size={18} className="text-blue-600"/> Data</h3>
-               <div className="flex flex-wrap gap-2">
-                 {['PostgreSQL', 'MySQL', 'MongoDB', 'Redis'].map(s => (
-                   <span key={s} className="px-2 py-1 bg-slate-50 rounded text-sm text-slate-700 border border-slate-100">{s}</span>
-                 ))}
-               </div>
+            <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <Database size={18} className="text-blue-600"/> Data
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {['PostgreSQL', 'MySQL', 'MongoDB', 'Redis'].map(s => (
+                  <span key={s} className="px-2 py-1 bg-slate-50 rounded text-sm text-slate-700 border border-slate-100">{s}</span>
+                ))}
+              </div>
             </div>
-             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
-               <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2"><Cloud size={18} className="text-blue-600"/> DevOps</h3>
-               <div className="flex flex-wrap gap-2">
-                 {['AWS', 'Docker', 'CI/CD', 'Linux'].map(s => (
-                   <span key={s} className="px-2 py-1 bg-slate-50 rounded text-sm text-slate-700 border border-slate-100">{s}</span>
-                 ))}
-               </div>
+            <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <Cloud size={18} className="text-blue-600"/> DevOps
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {['AWS', 'Docker', 'CI/CD', 'Linux'].map(s => (
+                  <span key={s} className="px-2 py-1 bg-slate-50 rounded text-sm text-slate-700 border border-slate-100">{s}</span>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
-         {/* Education Section */}
+        {/* Education Section */}
         <section id="education" className="mb-24 scroll-mt-24">
-           <div className="sticky top-0 lg:hidden py-4 bg-slate-50/90 backdrop-blur mb-6 z-10 border-b border-slate-200">
-             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Education</h2>
+          <div className="sticky top-0 lg:hidden py-4 bg-slate-50/90 backdrop-blur mb-6 z-10 border-b border-slate-200">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">Education</h2>
           </div>
           <div className="space-y-8">
             <div className="flex justify-between items-start">
@@ -347,23 +414,26 @@ const Portfolio = () => {
         {/* Contact Section */}
         <section id="contact" className="mb-24 scroll-mt-24">
           <div className="bg-slate-900 rounded-2xl p-8 md:p-12 text-center text-white">
-             <h2 className="text-2xl font-bold mb-4">Ready to Collaborate?</h2>
-             <p className="text-slate-400 mb-8 max-w-lg mx-auto">
-               I'm currently open to new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!
-             </p>
-             <a 
-               href="mailto:rileyxu399@gmail.com"
-               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors"
-             >
-               <Mail size={18} /> Say Hello
-             </a>
+            <h2 className="text-2xl font-bold mb-4">Ready to Collaborate?</h2>
+            <p className="text-slate-400 mb-8 max-w-lg mx-auto">
+              I'm currently open to new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!
+            </p>
+            <a
+              href="mailto:yxu399@gmail.com"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors"
+            >
+              <Mail size={18} /> Say Hello
+            </a>
           </div>
           <div className="mt-12 text-sm text-slate-500 text-center">
-             Designed & Built by Riley Xu.
+            Designed & Built by Riley Xu.
           </div>
         </section>
 
       </main>
+
+      {/* AI Chat Widget */}
+      <AIChatWidget />
     </div>
   );
 };
