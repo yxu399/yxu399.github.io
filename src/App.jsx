@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { marked } from 'marked';
 import AIChatWidget from './components/AIChatWidget';
+import { personalInfo, education, experience, projects, skills } from './content';
 
 const Portfolio = () => {
   const [activeSection, setActiveSection] = useState('about');
@@ -211,12 +212,12 @@ const Portfolio = () => {
             Riley Xu
           </h1>
           <h2 className="text-xl font-medium text-blue-400 mb-6 flex items-center gap-2">
-            Software Engineer <span className="text-slate-500">@</span> MSKCC
+            Software Engineer
           </h2>
           <p className="text-slate-400 max-w-xs leading-relaxed mb-12">
             I build scalable data systems and intelligent applications.
             <br />
-            <span className="text-slate-500 mt-2 block text-sm">New York, NY</span>
+            <span className="text-slate-500 mt-2 block text-sm">New York</span>
           </p>
 
           <nav>
@@ -257,16 +258,15 @@ const Portfolio = () => {
           </div>
           <div className="prose prose-slate prose-lg text-slate-600 max-w-none">
             <p className="text-xl font-medium text-slate-900 mb-6">
-              My journey evolved from <span className="text-blue-600">pipette to Python</span>.
+              From <span className="text-blue-600">pipette to Python</span>.
             </p>
             <p className="mb-4">
-              I started my career as a <strong>Clinical Laboratory Technologist</strong>, where I experienced the operational bottlenecks of healthcare firsthand. I spent days manually tracking samples and wrestling with outdated software, realizing that the real limitation wasn't the science—it was the data systems supporting it.
-            </p>
+              I started my career in <strong>clinical laboratories</strong>, where precision mattered but growth didn't. The work was repetitive, and I needed a field where the ceiling kept rising.
             <p className="mb-4">
-              Driven to build the solutions I once needed, I pivoted to engineering. I earned a Master's in <strong>Health Informatics</strong> at Cornell and a B.S. in <strong>Computer Science</strong> to combine domain expertise with technical rigor.
+              What drew me to software engineering was realizing that code lets you build solutions that scale. I earned a Master's in <strong>Health Informatics</strong> at Cornell and a B.S. in <strong>Computer Science</strong> to make the transition, learning to translate domain problems into technical systems. Previously, as a software engineer at <strong>Memorial Sloan Kettering Cancer Center</strong>, I built platforms that automated grant tracking and streamlined research operations for thousands of users.
             </p>
             <p>
-              Today, as a Software Engineer at <strong>Memorial Sloan Kettering Cancer Center</strong>, I architect the scalable administrative backbones—from grant tracking to resource allocation—that ensure research operations are as efficient as the science they support.
+              What excites me about engineering is its constant evolution. AI is lowering execution barriers, but that makes sound technical decision-making more valuable, not less. Strong fundamentals are what separate good solutions from great ones. I bring healthcare domain expertise, but I'm focused on solving complex problems across any industry.
             </p>
           </div>
         </section>

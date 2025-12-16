@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, X, Bot, User, ArrowUp, Loader2 } from 'lucide-react';
 import { marked } from 'marked';
+import { resumeContext } from '../content';
 
 const AIChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,38 +22,6 @@ const AIChatWidget = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const resumeContext = `
-Riley Yingjuan Xu is a Software Engineer based in New York.
-
-Education:
-- M.S. in Health Informatics, Cornell University (GPA 3.90)
-- B.S. in Computer Science, Oregon State University (GPA 3.85)
-
-Experience:
-- Software Engineer at Memorial Sloan Kettering Cancer Center (Dec 2022 - Present):
-  - Architected ETL pipelines matching 100K+ records using PubMed/ORCID APIs.
-  - Reduced reporting time 96% (3 days to 2 hrs).
-  - Built full-stack internal ops system (React, Node, Postgres) for 4,000+ employees.
-  - Co-developed BioBERT NLP platform for faculty evaluation.
-
-- Data Analyst Researcher at Weill Cornell Medicine (Nov 2021 - Apr 2022):
-  - Built Python ETL pipeline for 50,000+ medical records.
-  - Refactored logistic regression models to 85% accuracy using XGBoost.
-  - Built PyTest suites with 95% coverage.
-
-Projects:
-- DataQuest: AI Conversational Data Analysis Assistant (Python, LangGraph, React, FastAPI).
-- SyncCode: Real-Time Collaborative Code Editor (React, Express, Redis, Docker, DigitalOcean).
-
-Skills:
-- Languages: Python, TypeScript, SQL, Java, C.
-- Stack: React, Node.js, FastAPI, Pandas, Tailwind.
-- Data: PostgreSQL, MySQL, MongoDB, Redis.
-- DevOps: AWS, Docker, CI/CD.
-
-Background: Started as a Clinical Laboratory Technologist before pivoting to engineering.
-  `;
 
   const callGeminiChat = async (userQuery) => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
